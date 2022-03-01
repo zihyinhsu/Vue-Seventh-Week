@@ -1,7 +1,7 @@
 <template>
      <div class="container">
         <div class="text-end mt-4">
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" @click="openModal('isNew')">
             建立新的產品
           </button>
         </div>
@@ -27,21 +27,27 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td></td>
-              <td></td>
-              <td class="text-end"></td>
-              <td class="text-end"></td>
+            <tr v-for="product in products" :key="product.id">
+              <td>{{product.category}}</td>
+              <td>{{product.title}}</td>
+              <td>{{product.origin_price}}</td>
+              <td>{{product.price}}</td>
               <td>
-                <span class="text-success">啟用</span>
-                <span>未啟用</span>
+                <!-- ToggleSwitch-->
+                <div id="switch" class="switch" ref="switch">
+                      <toggle-switch
+                    :is-enabled="product.is_enabled"
+                    @get-product="getProducts"
+                    ></toggle-switch>
+                </div>
+                <!-- ToggleSwitch -->
               </td>
               <td>
                 <div class="btn-group">
-                  <button type="button" class="btn btn-outline-primary btn-sm">
+                  <button type="button" class="btn btn-outline-primary btn-sm" @click="openModal('edit',product)">
                     編輯
                   </button>
-                  <button type="button" class="btn btn-outline-danger btn-sm">
+                  <button type="button" class="btn btn-outline-danger btn-sm" @click="openModal('delete',product)">
                     刪除
                   </button>
                 </div>
@@ -49,39 +55,90 @@
             </tr>
           </tbody>
         </table>
+        <pagi-nation class="d-flex justify-content-center" :pages="pagination" @get-product ="getProducts"></pagi-nation>
       </div>
       <!-- ProductModal -->
-      <ProductModal></ProductModal>
+      <div id="productModal" ref="productModal" class="modal fade" tabindex="-1" aria-labelledby="productModalLabel"
+           aria-hidden="true">
+      <product-modal
+      :temp="temp"
+      :product-modal="productModal"
+      :is-new="isNew"
+      @get-product ="getProducts"></product-modal>
+      </div>
       <!-- DelProductModal -->
-      <DelProductModal></DelProductModal>
+      <div id="delProductModal" ref="delProductModal" class="modal fade" tabindex="-1"
+           aria-labelledby="delProductModalLabel" aria-hidden="true">
+      <del-product-modal
+      :temp="temp"
+      :del-product-modal="delProductModal"
+      @get-product ="getProducts"></del-product-modal>
+      </div>
 </template>
 
 <script>
-/* global bootstrap */
-import ProductModal from '@/components/ProductModal.vue'
-// import DelProductModal from '@/components/DelProductModal.vue'
+// /* global bootstrap */
+import BsModal from 'bootstrap/js/dist/modal'
+import ProductModal from '@/components/ProductModal'
+import DelProductModal from '@/components/DelProductModal'
+import PagiNation from '@/components/PagiNation'
+import ToggleSwitch from '@/components/ToggleSwitch'
 
 export default {
   data () {
     return {
-      productModal: ''
+      temp: {
+        imagesUrl: []
+      },
+      products: {},
+      pagination: {},
+      productModal: '',
+      delProductModal: '',
+      isNew: true
     }
   },
   components: {
-    ProductModal
-    // DelProductModal
+    ProductModal,
+    DelProductModal,
+    PagiNation,
+    ToggleSwitch
   },
   methods: {
-    openModal () {
-      this.productModal.show()
+    getProducts (page = 1) {
+      this.$http.get(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/products/?page=${page}`)
+        .then(res => {
+          this.products = res.data.products
+          this.pagination = res.data.pagination
+        }).catch(err => {
+          console.log(err)
+        })
+    },
+    openModal (status, product) {
+      if (status === 'isNew') {
+        this.temp = {
+          imagesUrl: []
+        }
+        this.productModal.show()
+        this.isNew = true
+      } else if (status === 'edit') {
+        // 深拷貝
+        this.temp = JSON.parse(JSON.stringify(product))
+        this.productModal.show()
+        this.isNew = false
+      } else if (status === 'delete') {
+        this.temp = { ...product }
+        this.delProductModal.show()
+      }
     }
+    // toggleSwitch () {
+    //   this.$refs.toggle.toggleSwitch()
+    // }
   },
   mounted () {
-    this.productModal = new bootstrap.Modal(this.$refs.productModal, {
-      keyboard: false
-    })
-
-    this.openModal()
+    this.productModal = new BsModal(this.$refs.productModal)
+    this.delProductModal = new BsModal(this.$refs.delProductModal)
+    this.getProducts()
+    console.log(this.$refs.switch)
   }
 }
 </script>

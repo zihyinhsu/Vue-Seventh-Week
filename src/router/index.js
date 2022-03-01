@@ -9,7 +9,8 @@ const routes = [
       {
         path: '',
         name: 'home',
-        component: HomeView
+        component: HomeView,
+        meta: { title: '首頁' }
       },
       {
         path: 'products',
@@ -35,7 +36,13 @@ const routes = [
     children: [
       {
         path: 'products',
-        component: () => import('../views/AdminProducts.vue')
+        component: () => import('../views/AdminProducts.vue'),
+        meta: { title: '後台產品列表' }
+      },
+      {
+        path: 'order',
+        component: () => import('../views/AdminOrder.vue'),
+        meta: { title: '後台訂單列表' }
       },
       {
         path: 'coupon',
@@ -49,6 +56,11 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
   linkActiveClass: 'active'
+})
+
+router.beforeEach((to, from, next) => {
+  window.document.title = to.meta.title
+  next()
 })
 
 export default router

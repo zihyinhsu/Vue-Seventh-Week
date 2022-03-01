@@ -52,7 +52,6 @@ export default {
       const id = this.$route.params.id
       this.$http.get(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/product/${id}`)
         .then((res) => {
-          // console.log(res)
           this.product = res.data.product
         }).catch((err) => {
           console.log(err)

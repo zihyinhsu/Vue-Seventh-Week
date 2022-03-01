@@ -36,10 +36,9 @@ export default {
     getProducts () {
       this.$http.get(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/products/all`)
         .then((res) => {
-          // console.log(res)
           this.products = res.data.products
         }).catch((err) => {
-          console.log('123', err)
+          console.log(err)
         })
     },
     // 加入購物車
