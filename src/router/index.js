@@ -14,19 +14,23 @@ const routes = [
       },
       {
         path: 'products',
-        component: () => import('../views/ProductsView.vue')
+        component: () => import('../views/ProductsView.vue'),
+        meta: { title: '產品列表' }
       },
       {
         path: 'product/:id',
-        component: () => import('../views/ProductView.vue')
+        component: () => import('../views/ProductView.vue'),
+        meta: { title: '產品詳情' }
       },
       {
         path: 'login',
-        component: () => import('../views/LoginView.vue')
+        component: () => import('../views/LoginView.vue'),
+        meta: { title: '登入頁面' }
       },
       {
         path: 'cart',
-        component: () => import('../views/CartView.vue')
+        component: () => import('../views/CartView.vue'),
+        meta: { title: '購物車' }
       }
     ]
   },
@@ -46,7 +50,8 @@ const routes = [
       },
       {
         path: 'coupon',
-        component: () => import('../views/AdminCoupon.vue')
+        component: () => import('../views/AdminCoupon.vue'),
+        meta: { title: '優惠券' }
       }
     ]
   }

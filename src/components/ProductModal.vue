@@ -12,24 +12,53 @@
             <div class="modal-body">
               <div class="row">
                 <div class="col-sm-4">
-                  <div class="mb-2">
-                    <div class="mb-3">
-                      <label for="imageUrl" class="form-label">輸入圖片網址</label>
-                      <input type="text" class="form-control" v-model="temProduct.imageUrl"
-                             placeholder="請輸入圖片連結">
+                    <div class="d-flex flex-column align-items-center mb-2">
+                      <h4 class="mb-3">上傳圖片</h4>
+                       <form class="d-flex align-items-center mb-2" action="/api/zy123/admin/upload" enctype="multipart/form-data"  method="post">
+                          <label class="btn btn-outline-success me-2" @change="chooseImg">
+                            <div class="overflow-hidden position-relative">
+                              <i class="fa-solid fa-cloud-arrow-up me-2"></i>
+                              <span>選擇圖片</span>
+                              <input class="position-absolute start-0" ref="fileInput" type="file" name="file-to-upload" style="opacity:0;">
+                            </div>
+                          </label>
+                          <label class="btn btn-success btn-sm rounded-circle me-2" @click.prevent="upload">
+                            <div class="overflow-hidden position-relative">
+                            <i class="fa-solid fa-circle-plus"></i>
+                            <input class="position-absolute start-0" type="submit" value="Upload" style="opacity:0;">
+                            </div>
+                          </label>
+                        </form>
+                        <img :src="temProduct.imgPreviewURL" alt="" ref="imgPreview" style="width:300px">
                     </div>
-                    <img class="img-fluid" :src="temProduct.imageUrl" alt="">
+                    <div class="mb-3">
+                      <h4>產品主圖</h4>
+                      <!-- <label for="imageUrl" class="form-label">輸入圖片網址</label> -->
+                      <input type="text" class="form-control mb-2" v-model="temProduct.imageUrl"
+                             placeholder="請輸入圖片連結">
+                      <img class="img-fluid w-100" :src="temProduct.imageUrl" style="height: 200px; object-fit:cover;">
                   </div>
+
                   <div>
-                    <button class="btn btn-outline-primary btn-sm d-block w-100">
-                      新增圖片
-                    </button>
+                       <!-- 判斷是否是陣列 -->
+                      <div v-if="Array.isArray(temProduct.imagesUrl)">
+                        <h4>其他產品圖片</h4>
+                        <template v-for="(img,key) in temProduct.imagesUrl" :key="key">
+                          <input type="text" class="form-control" v-model="temProduct.imagesUrl[key]">
+                        <img class="img-fluid my-2 w-100" :src="temProduct.imagesUrl[key]" alt="" style="height: 200px; object-fit:cover;">
+                        </template>
+                         <!-- 1.判斷是否有沒有圖片網址 2. 判斷 imagesUrl 的陣列的特定索引位置有沒有文字-->
+                        <button v-if="!temProduct.imagesUrl.length || temProduct.imagesUrl[temProduct.imagesUrl.length-1]"
+                          class="btn btn-primary btn-sm d-block w-100" @click="temProduct.imagesUrl.push('')">
+                          新增圖片
+                        </button>
+                        <button v-else
+                          class="btn btn-outline-danger btn-sm d-block w-100" @click="temProduct.imagesUrl.pop('')">
+                          刪除最後一張圖片
+                        </button>
+                    </div>
                   </div>
-                  <div>
-                    <button class="btn btn-outline-danger btn-sm d-block w-100">
-                      刪除圖片
-                    </button>
-                  </div>
+
                 </div>
                 <div class="col-sm-8">
                   <div class="mb-3">
@@ -104,12 +133,15 @@ export default {
   props: ['temp', 'productModal', 'is-new'],
   data () {
     return {
-      temProduct: {}
+      temProduct: {
+        imagesUrl: [],
+        imgPreviewURL: ''
+      }
     }
   },
   // 在這裡設監聽的原因 : 因為外層的temp資料要觸發openModal事件，temp才會有資料。
   // 如果我們直接在mounted 裡面 把 this.temProduct 用深拷貝複製 props進來的 temp資料，
-  // this.temProduct會呈現空值，因為它拷貝到的是我們觸發openModal事件的狀態。
+  // this.temProduct會呈現空值，因為它拷貝到的是我們觸發openModal事件前的狀態。
   // 因此我們可以在子元件內設監聽，一旦外層觸發openModal，子元件內的temp資料有了變化，
   // 就執行this.temProduct = JSON.parse(JSON.stringify(this.temp))
   watch: {
@@ -140,9 +172,24 @@ export default {
           alert(alertContent)
           this.productModal.hide()
         })
+    },
+    // 圖片預覽效果
+    chooseImg (e) {
+      const [file] = e.target.files
+      this.temProduct.imgPreviewURL = window.URL.createObjectURL(file)
+    },
+    // 圖片上傳
+    upload () {
+      const file = this.$refs.fileInput.files[0]
+      const formData = new FormData()
+      formData.append('file-to-upload', file)
+      this.$http.post(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/upload`, formData)
+        .then(res => {
+          alert('圖片已成功上傳')
+          this.temProduct.imagesUrl.push(res.data.imageUrl)
+          this.temProduct.imgPreviewURL = ''
+        })
     }
-  },
-  mounted () {
   }
 }
 </script>

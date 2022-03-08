@@ -36,6 +36,7 @@ export default {
       this.$http.post(`${process.env.VUE_APP_API}/admin/signin`, this.user)
         .then((res) => {
           const { token, expired } = res.data
+          // console.log(token)
           // 寫入 cookie token
           document.cookie = `zyToken=${token}; expires=${new Date(expired)}`
           alert(res.data.message)
@@ -48,7 +49,6 @@ export default {
     }
   },
   mounted () {
-
   }
 }
 </script>
