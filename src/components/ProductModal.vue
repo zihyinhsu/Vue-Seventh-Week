@@ -1,6 +1,6 @@
 <template>
-    <!-- <div id="productModal" ref="productModal" class="modal fade" tabindex="-1" aria-labelledby="productModalLabel"
-           aria-hidden="true"> -->
+    <div id="productModal" ref="modal" class="modal fade" tabindex="-1" aria-labelledby="productModalLabel"
+           aria-hidden="true">
         <div class="modal-dialog modal-xl">
           <div class="modal-content border-0">
             <div class="modal-header bg-dark text-white">
@@ -125,18 +125,21 @@
             </div>
           </div>
         </div>
-      <!-- </div> -->
+      </div>
 </template>
 
 <script>
+import BsModal from 'bootstrap/js/dist/modal'
+
 export default {
-  props: ['temp', 'productModal', 'is-new'],
+  props: ['temp', 'is-new'],
   data () {
     return {
       temProduct: {
         imagesUrl: [],
         imgPreviewURL: ''
-      }
+      },
+      productModal: ''
     }
   },
   // 在這裡設監聽的原因 : 因為外層的temp資料要觸發openModal事件，temp才會有資料。
@@ -189,7 +192,16 @@ export default {
           this.temProduct.imagesUrl.push(res.data.imageUrl)
           this.temProduct.imgPreviewURL = ''
         })
+    },
+    openModal () {
+      this.productModal.show()
+    },
+    closeModal () {
+      this.productModal.hide()
     }
+  },
+  mounted () {
+    this.productModal = new BsModal(this.$refs.modal)
   }
 }
 </script>

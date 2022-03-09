@@ -37,7 +37,7 @@
                 <td style="cursor:pointer">
                     <label class="switch">
                       <input type="checkbox"
-                      @change="updatePaid(item.id, item)"
+                      @change="updatePaid(item)"
                       v-model="item.is_paid">
                       <span class="slider"></span>
                   </label>
@@ -48,7 +48,7 @@
                     <button type="button" class="btn btn-outline-primary btn-sm" @click="openModal('edit',item)">
                         編輯
                     </button>
-                    <button type="button" class="btn btn-outline-danger btn-sm">
+                    <button type="button" class="btn btn-outline-danger btn-sm" @click="openModal('delete',item)">
                         刪除
                     </button>
                     </div>
@@ -57,7 +57,9 @@
             </tbody>
             </table>
     </div>
-    <OrderModal ref="orderModal" :temp="temp"></OrderModal>
+    <order-modal ref="orderModal" :temp="temp" @update-paid="updatePaid"></order-modal>
+    <del-modal ref="delModal" :temp="temp" @del-item="delOrder"></del-modal>
+    <pagi-nation class="d-flex justify-content-center" :pages="pagination" @update-page ="getOrders"></pagi-nation>
 </template>
 
 <style lang="sass">
@@ -66,7 +68,10 @@
 </style>
 
 <script>
-import OrderModal from '@/components/OrderModal.vue'
+import OrderModal from '@/components/OrderModal'
+import PagiNation from '@/components/PagiNation'
+import DelModal from '@/components/DelModal'
+
 export default {
   data () {
     return {
@@ -77,22 +82,28 @@ export default {
     }
   },
   components: {
-    OrderModal
+    OrderModal,
+    PagiNation,
+    DelModal
   },
   methods: {
-    getOrders () {
-      this.$http.get(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/orders`)
+    getOrders (page = 1) {
+      this.$http.get(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/orders/?page=${page}`)
         .then((res) => {
           this.orders = res.data.orders
           this.pagination = res.data.pagination
+        }).catch((err) => {
+          alert(err)
         })
     },
-    updatePaid (id, item) {
+    updatePaid (item, page = 1) {
       this.temp = item
-      this.$http.put(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/order/${id}`,
+      this.$http.put(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/order/${item.id}`,
         { data: this.temp })
         .then((res) => {
           alert(res.data.message)
+          this.$refs.orderModal.closeModal()
+          this.getOrders(page)
         }).catch((err) => {
           alert(err.data.message)
         })
@@ -103,7 +114,17 @@ export default {
         this.$refs.orderModal.openModal()
       } else if (status === 'delete') {
         this.temp = { ...product }
+        this.$refs.delModal.openModal()
       }
+    },
+    delOrder () {
+      this.$http.delete(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/order/${this.temp.id}`)
+        .then((res) => {
+          this.$refs.delModal.closeModal()
+          this.getOrders()
+        }).catch((error) => {
+          alert(error.data.message)
+        })
     }
   },
   computed: {

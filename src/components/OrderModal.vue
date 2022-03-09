@@ -29,19 +29,19 @@
                 <tbody>
                   <tr>
                     <th style="width: 100px">姓名</th>
-                    <td>{{ tempOrder.user.name }}</td>
+                    <td>{{ tempOrder.user?.name }}</td>
                   </tr>
                   <tr>
                     <th>Email</th>
-                    <td>{{  }}</td>
+                    <td>{{ tempOrder.user?.email }}</td>
                   </tr>
                   <tr>
                     <th>電話</th>
-                    <td>{{  }}</td>
+                    <td>{{ tempOrder.user?.tel }}</td>
                   </tr>
                   <tr>
                     <th>地址</th>
-                    <td>{{ }}</td>
+                    <td>{{ tempOrder.user?.address }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -52,13 +52,13 @@
                 <tbody>
                   <tr>
                     <th style="width: 100px">訂單編號</th>
-                    <td>{{ }}</td>
+                    <td>{{ tempOrder.id }}</td>
                   </tr>
                   <tr>
                     <th>下單時間</th>
-                    <td>{{  }}</td>
+                    <td>{{ orderTime  }}</td>
                   </tr>
-                  <tr>
+                  <!-- <tr>
                     <th>付款時間</th>
                     <td>
                       <span>
@@ -66,20 +66,20 @@
                       </span>
                       <span>時間不正確</span>
                     </td>
-                  </tr>
+                  </tr> -->
                   <tr>
                     <th>付款狀態</th>
                     <td>
-                      <strong  class="text-success"
+                      <strong  class="text-success" v-if="tempOrder.is_paid"
                         >已付款</strong
                       >
-                      <span  class="text-muted">尚未付款</span>
+                      <span  class="text-muted" v-else>尚未付款</span>
                     </td>
                   </tr>
                   <tr>
                     <th>總金額</th>
                     <td>
-                      {{  }}
+                      NT$ {{ tempOrder.total }}
                     </td>
                   </tr>
                 </tbody>
@@ -90,13 +90,13 @@
                   <tr></tr>
                 </thead>
                 <tbody>
-                  <tr >
+                  <tr v-for="product in tempOrder.products" :key="product.id">
                     <th>
-                      {{  }}
+                      {{ product.product.title }}
                     </th>
-                    <td>{{  }} / {{  }}</td>
+                    <td>{{ product.qty }} / {{ product.product.unit }}</td>
                     <td class="text-end">
-                      {{  }}
+                      $ {{ product.final_total }}
                     </td>
                   </tr>
                 </tbody>
@@ -108,10 +108,11 @@
                     type="checkbox"
                     value=""
                     id="flexCheckDefault"
+                    v-model="tempOrder.is_paid"
                   />
                   <label class="form-check-label" for="flexCheckDefault">
-                    <span >已付款</span>
-                    <span >未付款</span>
+                    <span v-if="tempOrder.is_paid" >已付款</span>
+                    <span v-else>未付款</span>
                   </label>
                 </div>
               </div>
@@ -129,7 +130,7 @@
           <button
             type="button"
             class="btn btn-primary"
-          >
+          @click="$emit('updatePaid',tempOrder)">
             修改付款狀態
           </button>
         </div>
@@ -157,9 +158,20 @@ export default {
       deep: true
     }
   },
+  computed: {
+    // 處理訂單時間
+    orderTime () {
+      let orderTime = ''
+      orderTime = new Date(this.tempOrder.create_at * 1000).toLocaleDateString()
+      return orderTime
+    }
+  },
   methods: {
     openModal () {
       this.orderModal.show()
+    },
+    closeModal () {
+      this.orderModal.hide()
     }
   },
   mounted () {

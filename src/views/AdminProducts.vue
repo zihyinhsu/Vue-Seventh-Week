@@ -58,25 +58,18 @@
             </tr>
           </tbody>
         </table>
-        <pagi-nation class="d-flex justify-content-center" :pages="pagination" @get-product ="getProducts"></pagi-nation>
+        <pagi-nation class="d-flex justify-content-center"
+        :pages="pagination" @update-page ="getProducts"></pagi-nation>
       </div>
       <!-- ProductModal -->
-      <div id="productModal" ref="productModal" class="modal fade" tabindex="-1" aria-labelledby="productModalLabel"
-           aria-hidden="true">
       <product-modal
       :temp="temp"
-      :product-modal="productModal"
       :is-new="isNew"
-      @get-product ="getProducts"></product-modal>
-      </div>
-      <!-- DelProductModal -->
-      <div id="delProductModal" ref="delProductModal" class="modal fade" tabindex="-1"
-           aria-labelledby="delProductModalLabel" aria-hidden="true">
-      <del-product-modal
+      @get-product ="getProducts" ref="productModal"></product-modal>
+      <!-- DelModal -->
+      <del-modal
       :temp="temp"
-      :del-product-modal="delProductModal"
-      @get-product ="getProducts"></del-product-modal>
-      </div>
+      @get-product ="getProducts" @del-item="delProductItem" ref="delModal"></del-modal>
 </template>
 
 <style lang="sass">
@@ -86,9 +79,8 @@
 
 <script>
 // /* global bootstrap */
-import BsModal from 'bootstrap/js/dist/modal'
 import ProductModal from '@/components/ProductModal'
-import DelProductModal from '@/components/DelProductModal'
+import DelModal from '@/components/DelModal'
 import PagiNation from '@/components/PagiNation'
 
 export default {
@@ -99,14 +91,12 @@ export default {
       },
       products: {},
       pagination: {},
-      productModal: '',
-      delProductModal: '',
       isNew: true
     }
   },
   components: {
     ProductModal,
-    DelProductModal,
+    DelModal,
     PagiNation
   },
   methods: {
@@ -124,7 +114,7 @@ export default {
         this.temp = {
           imagesUrl: []
         }
-        this.productModal.show()
+        this.$refs.productModal.openModal()
         this.isNew = true
       } else if (status === 'edit') {
         // 深拷貝
@@ -133,11 +123,11 @@ export default {
         if (!this.temp.imagesUrl) {
           this.temp.imagesUrl = []
         }
-        this.productModal.show()
+        this.$refs.productModal.openModal()
         this.isNew = false
       } else if (status === 'delete') {
         this.temp = { ...product }
-        this.delProductModal.show()
+        this.$refs.delModal.openModal()
       }
     },
     updateProduct (id, product) {
@@ -149,11 +139,18 @@ export default {
         }).catch((err) => {
           console.dir(err.data.message)
         })
+    },
+    delProductItem () {
+      this.$http.delete(`${process.env.VUE_APP_API}/api/${process.env.VUE_APP_PATH}/admin/product/${this.temp.id}`)
+        .then((res) => {
+          this.$refs.delModal.closeModal()
+          this.getProducts()
+        }).catch((error) => {
+          alert(error.data.message)
+        })
     }
   },
   mounted () {
-    this.productModal = new BsModal(this.$refs.productModal)
-    this.delProductModal = new BsModal(this.$refs.delProductModal)
     this.getProducts()
   }
 }
