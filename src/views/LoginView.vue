@@ -39,11 +39,12 @@ export default {
           // console.log(token)
           // 寫入 cookie token
           document.cookie = `zyToken=${token}; expires=${new Date(expired)}`
-          alert(res.data.message)
+          // alert(res.data.message)
+          this.$httpMessageState(res, '登入', '已成功登入')
           // 轉址
           this.$router.push('/admin/products')
-        }).catch(() => {
-          alert('請輸入正確帳號密碼')
+        }).catch((err) => {
+          this.$httpMessageState(err.response, '登入', '請重新登入')
           this.user.password = ''
         })
     }

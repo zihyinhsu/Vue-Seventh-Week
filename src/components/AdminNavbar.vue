@@ -29,7 +29,6 @@ export default {
   methods: {
     signout () {
       document.cookie = 'zyToken=; expires=;'
-      alert('已登出!')
       this.$router.push('/login')
     }
   }

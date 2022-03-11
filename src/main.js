@@ -4,6 +4,9 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
+
+import $httpMessageState from '@/libs/pushMessageState'
+
 // 匯入 vee-validate 主套件
 import {
   Field, Form, ErrorMessage, defineRule, configure
@@ -38,6 +41,9 @@ configure({
 setLocale('zh_TW')
 
 const app = createApp(App).use(router)
+
+app.config.globalProperties.$httpMessageState = $httpMessageState
+
 app.use(VueAxios, axios)
 app.component('FormView', Form)
 app.component('FieldView', Field)

@@ -1,10 +1,13 @@
 <template>
   <admin-navbar></admin-navbar>
+  <toast-msg></toast-msg>
   <router-view v-if="checkSuccess"></router-view>
 </template>
 
 <script>
 import AdminNavbar from '@/components/AdminNavbar.vue'
+import ToastMsg from '@/components/ToastMsg.vue'
+
 export default {
   data () {
     return {
@@ -12,7 +15,8 @@ export default {
     }
   },
   components: {
-    AdminNavbar
+    AdminNavbar,
+    ToastMsg
   },
   methods: {
     checkLogin () {
